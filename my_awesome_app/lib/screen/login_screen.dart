@@ -1,161 +1,182 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
-
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
+void main() {
+  runApp(const MyApp());
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final formKey = GlobalKey<FormState>();
-  final usernameController = TextEditingController();
-  final passwordController = TextEditingController();
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
-  void dispose() {
-    usernameController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> Login(BuildContext context) async {
-    final username = usernameController.text;
-    final password = passwordController.text;
-
-    final response = await http.post(
-      Uri.parse('https://api.unira.ac.id/v1/token'),
-      headers: <String, String>{
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: {
-        'username': username,
-        'password': password,
-      },
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: const LoginScreen(),
     );
-
-    if (response.statusCode == 201) {
-      final data = jsonDecode(response.body);
-      final message = data['message'];
-      final token = data['token'];
-      print('Message: $message');
-      print('Token: $token');
-      print(response.body);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Login Success'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      print('Failed to login');
-      print(response.body);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Failed to login'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
+}
+
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        padding: const EdgeInsets.all(20),
-        height: double.infinity,
-        width: double.infinity,
-        decoration:
-            const BoxDecoration(color: Color.fromARGB(255, 253, 253, 253)),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Login Kuis Pintar',
-              style: TextStyle(
-                  fontSize: 28,
+      backgroundColor: Color(0xFF7A94AD),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Selamat Datang Di Aplikasi\nQuiz Pintar',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 0, 0, 0)),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Form(
-              key: formKey,
-              child: Column(
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 40),
+              TextField(
+                decoration: InputDecoration(
+                  hintText: "Username",
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: "Password",
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  "Forgot Password?",
+                  style: TextStyle(color: Colors.black54, fontSize: 12),
+                ),
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  minimumSize: const Size(double.infinity, 50),
+                ),
+                child: const Text(
+                  "LOGIN",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
                 children: [
-                  TextFormField(
-                    controller: usernameController,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.person),
-                      labelText: 'NIS / NIM',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
+                  Expanded(
+                    child: Divider(
+                      thickness: 1, // Ketebalan garis
+                      color: Colors.black26, // Warna garis
+                      indent: 20, // Jarak dari kiri
+                      endIndent: 10, // Jarak menuju teks
                     ),
-                    validator: (value) =>
-                        value!.isEmpty ? 'NIS / NIM tidak boleh kosong' : null,
-                    keyboardType: TextInputType.number,
                   ),
-                  const SizedBox(
-                    height: 20,
+                  Text(
+                    'Lanjut Dengan Akun',
+                    style: TextStyle(fontSize: 12, color: Colors.black54),
                   ),
-                  TextFormField(
-                    controller: passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.lock),
-                      labelText: 'Password / PIN',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
+                  Expanded(
+                    child: Divider(
+                      thickness: 1, // Ketebalan garis
+                      color: Colors.black26, // Warna garis
+                      indent: 10, // Jarak menuju teks
+                      endIndent: 20, // Jarak dari kanan
                     ),
-                    validator: (value) => value!.isEmpty
-                        ? 'Password / PIN tidak boleh kosong'
-                        : null,
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        final username = usernameController.text;
-                        final password = passwordController.text;
-                        print('Username: $username');
-                        print('Password: $password');
-                        Login(context);
-                      }
-                    },
-                    icon: const Icon(Icons.login),
-                    label: const Text(
-                      'Login',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 50, vertical: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  )
                 ],
               ),
-            )
-          ],
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding:
+                        EdgeInsets.all(8), // Padding untuk jarak di dalam box
+                    decoration: BoxDecoration(
+                      color: Colors.white, // Warna box putih
+                      borderRadius:
+                          BorderRadius.circular(8), // Sudut melengkung
+                    ),
+                    child: Image.asset(
+                      'assets/images/google.jpg',
+                      width: 40,
+                      height: 40,
+                    ),
+                  ),
+                  SizedBox(width: 20), // Jarak antar box
+
+                  Container(
+                    padding:
+                        EdgeInsets.all(8), // Padding untuk jarak di dalam box
+                    decoration: BoxDecoration(
+                      color: Colors.white, // Warna box putih
+                      borderRadius:
+                          BorderRadius.circular(8), // Sudut melengkung
+                    ),
+                    child: Image.asset(
+                      'assets/images/apple.jpg',
+                      width: 40,
+                      height: 40,
+                    ),
+                  ),
+                  SizedBox(width: 20), // Jarak antar box
+
+                  Container(
+                    padding:
+                        EdgeInsets.all(8), // Padding untuk jarak di dalam box
+                    decoration: BoxDecoration(
+                      color: Colors.white, // Warna box putih
+                      borderRadius:
+                          BorderRadius.circular(8), // Sudut melengkung
+                    ),
+                    child: Image.asset(
+                      'assets/images/fb.jpg',
+                      width: 40,
+                      height: 40,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+              RichText(
+                text: const TextSpan(
+                  text: "Dont Have An Account? ",
+                  style: TextStyle(color: Colors.black),
+                  children: [
+                    TextSpan(
+                      text: "Register Now",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.black),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
