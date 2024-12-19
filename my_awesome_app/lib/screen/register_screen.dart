@@ -12,13 +12,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const LoginScreen(),
+      home: const RegisterScreen(),
     );
   }
 }
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatelessWidget {
+  const RegisterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +40,19 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 40),
+              TextFormField(
+                decoration: InputDecoration(
+                  labelText: "Email",
+                  floatingLabelBehavior: FloatingLabelBehavior.auto,
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
               TextFormField(
                 decoration: InputDecoration(
                   labelText: "Username",
@@ -66,15 +79,7 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  "Forgot Password?",
-                  style: TextStyle(color: Colors.black54, fontSize: 12),
-                ),
-              ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
@@ -83,7 +88,7 @@ class LoginScreen extends StatelessWidget {
                   minimumSize: const Size(double.infinity, 50),
                 ),
                 child: const Text(
-                  "LOGIN",
+                  "REGISTER",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -167,22 +172,22 @@ class LoginScreen extends StatelessWidget {
               const SizedBox(height: 30),
               RichText(
                 text: TextSpan(
-                  text: "Dont Have An Account? ",
+                  text: "Already Have Account? ",
                   style: TextStyle(color: Colors.black),
                   children: [
                     TextSpan(
-                      text: "Register Now",
+                      text: "Login Now",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: const Color.fromARGB(
-                            255, 0, 4, 7), // Warna teks tautan
+                            255, 0, 5, 8), // Warna teks tautan
                         decoration: TextDecoration
                             .underline, // Tambahkan garis bawah untuk indikasi link
                       ),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
                           Navigator.pushNamed(
-                              context, '/register'); // Navigasi ke /register
+                              context, '/'); // Navigasi ke /register
                         },
                     ),
                   ],
