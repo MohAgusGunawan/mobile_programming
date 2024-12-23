@@ -95,22 +95,102 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         buttonBackgroundColor: Colors.white, // Warna tombol aktif
         height: 60, // Tinggi untuk melengkung lebih jelas
         items: [
-          Icon(Icons.home,
-              size: 30,
-              color:
-                  _currentIndex == 0 ? const Color(0xFF8E44AD) : Colors.grey),
-          Icon(Icons.emoji_events,
-              size: 30,
-              color:
-                  _currentIndex == 1 ? const Color(0xFF8E44AD) : Colors.grey),
-          Icon(Icons.show_chart,
-              size: 30,
-              color:
-                  _currentIndex == 2 ? const Color(0xFF8E44AD) : Colors.grey),
-          Icon(Icons.person,
-              size: 30,
-              color:
-                  _currentIndex == 3 ? const Color(0xFF8E44AD) : Colors.grey),
+          Container(
+            width: 80, // Lebar tetap untuk setiap item
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.home,
+                  size: 30,
+                  color: _currentIndex == 0
+                      ? const Color(0xFF8E44AD)
+                      : Colors.grey,
+                ),
+                Text(
+                  'Home',
+                  style: TextStyle(
+                    fontSize: 9,
+                    color: _currentIndex == 0
+                        ? const Color(0xFF8E44AD)
+                        : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 80, // Lebar tetap untuk setiap item
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.emoji_events,
+                  size: 30,
+                  color: _currentIndex == 1
+                      ? const Color(0xFF8E44AD)
+                      : Colors.grey,
+                ),
+                Text(
+                  'Ranking',
+                  style: TextStyle(
+                    fontSize: 9,
+                    color: _currentIndex == 1
+                        ? const Color(0xFF8E44AD)
+                        : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 80, // Lebar tetap untuk setiap item
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.show_chart,
+                  size: 30,
+                  color: _currentIndex == 2
+                      ? const Color(0xFF8E44AD)
+                      : Colors.grey,
+                ),
+                Text(
+                  'Statistics',
+                  style: TextStyle(
+                    fontSize: 9,
+                    color: _currentIndex == 2
+                        ? const Color(0xFF8E44AD)
+                        : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 80, // Lebar tetap untuk setiap item
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.person,
+                  size: 30,
+                  color: _currentIndex == 3
+                      ? const Color(0xFF8E44AD)
+                      : Colors.grey,
+                ),
+                Text(
+                  'Profile',
+                  style: TextStyle(
+                    fontSize: 9,
+                    color: _currentIndex == 3
+                        ? const Color(0xFF8E44AD)
+                        : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
         onTap: (index) {
           setState(() {
