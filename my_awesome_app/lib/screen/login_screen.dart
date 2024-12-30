@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:my_awesome_app/service/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,11 +21,10 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
 
     if (username.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Username dan Password tidak boleh kosong!'),
-          backgroundColor: Colors.red,
-        ),
+      _showCustomSnackbar(
+        context,
+        'Username dan Password tidak boleh kosong!',
+        Colors.red,
       );
       return;
     }
@@ -40,21 +40,63 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     if (result['success']) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Login Berhasil'),
-          backgroundColor: Colors.green,
-        ),
+      _showCustomSnackbar(
+        context,
+        'Login Berhasil',
+        Colors.green,
       );
-      Navigator.pushReplacementNamed(context, '/welcome');
+
+      final userData = result['data']['user'];
+      final role = userData['role'];
+      final userId = userData['id']; // Dapatkan ID pengguna
+
+      // Simpan ID pengguna ke SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('id', userId);
+
+      if (role == 'user') {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        Navigator.pushReplacementNamed(context, '/home_admin');
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message']),
-          backgroundColor: Colors.red,
-        ),
+      _showCustomSnackbar(
+        context,
+        result['message'],
+        Colors.red,
       );
     }
+  }
+
+  void _showCustomSnackbar(BuildContext context, String message, Color color) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 20, // Jarak dari atas layar
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              message,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    Future.delayed(const Duration(seconds: 3), () {
+      overlayEntry.remove();
+    });
   }
 
   @override

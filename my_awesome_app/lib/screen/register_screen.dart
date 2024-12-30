@@ -17,11 +17,10 @@ class RegisterScreen extends StatelessWidget {
     final password = passwordController.text;
 
     if (email.isEmpty || username.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Semua field harus diisi!'),
-          backgroundColor: Colors.red,
-        ),
+      _showCustomSnackbar(
+        context,
+        'Semua inputan harus diisi!',
+        Colors.red,
       );
       return;
     }
@@ -29,20 +28,50 @@ class RegisterScreen extends StatelessWidget {
     final result = await apiService.register(email, username, password);
 
     if (result['success']) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registrasi Berhasil'),
-          backgroundColor: Colors.green,
-        ),
+      _showCustomSnackbar(
+        context,
+        'Registrasi Berhasil',
+        Colors.green,
       );
+      Navigator.pushReplacementNamed(context, '/');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message']),
-          backgroundColor: Colors.red,
-        ),
+      _showCustomSnackbar(
+        context,
+        result['message'],
+        Colors.red,
       );
     }
+  }
+
+  void _showCustomSnackbar(BuildContext context, String message, Color color) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 20, // Jarak dari atas layar
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              message,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    Future.delayed(const Duration(seconds: 3), () {
+      overlayEntry.remove();
+    });
   }
 
   @override
