@@ -13,9 +13,11 @@ class KategoriScreen extends StatefulWidget {
 }
 
 class _KategoriScreenState extends State<KategoriScreen> {
-  int _currentIndex = 2;
+  int _currentIndex = 1;
   File? selectedImage;
   Uint8List? webImageBytes;
+  String searchQuery = '';
+  List<Map<String, dynamic>> kategoriData = [];
 
   void _onTabTapped(int index) {
     setState(() {
@@ -23,13 +25,22 @@ class _KategoriScreenState extends State<KategoriScreen> {
     });
   }
 
-  // Fungsi ambil ID
+  Future<void> fetchKategoriData() async {
+    try {
+      final data = await ApiService().fetchKategori();
+      setState(() {
+        kategoriData = data;
+      });
+    } catch (e) {
+      print('Error fetching data: $e');
+    }
+  }
+
   Future<int?> getUserId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt('id'); // Ambil ID pengguna
   }
 
-  // Fungsi untuk memilih gambar
   Future<void> _pickImage() async {
     try {
       if (kIsWeb) {
@@ -41,10 +52,7 @@ class _KategoriScreenState extends State<KategoriScreen> {
         if (result != null && result.files.single.bytes != null) {
           setState(() {
             webImageBytes = result.files.single.bytes;
-            print('webImageBytes berhasil diisi.');
           });
-        } else {
-          print('webImageBytes tetap null.');
         }
       } else {
         final ImagePicker picker = ImagePicker();
@@ -54,25 +62,15 @@ class _KategoriScreenState extends State<KategoriScreen> {
         if (image != null) {
           setState(() {
             selectedImage = File(image.path);
-            webImageBytes = null; // Reset gambar web
+            webImageBytes = null;
           });
-          print('Gambar berhasil dipilih dari perangkat: ${image.path}');
-        } else {
-          print('Tidak ada gambar yang dipilih di perangkat.');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Tidak ada gambar yang dipilih')),
-          );
         }
       }
     } catch (e) {
       print('Error saat memilih gambar: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahan: $e')),
-      );
     }
   }
 
-  // Fungsi untuk menampilkan modal tambah kategori
   void _showTambahKategoriModal(BuildContext context) {
     final _formKey = GlobalKey<FormState>();
     String kategoriNama = '';
@@ -92,11 +90,7 @@ class _KategoriScreenState extends State<KategoriScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15.0),
               ),
-              title: const Text(
-                'Tambah Kategori',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              title: const Text('Tambah Kategori', textAlign: TextAlign.center),
               content: Form(
                 key: _formKey,
                 child: Column(
@@ -145,13 +139,25 @@ class _KategoriScreenState extends State<KategoriScreen> {
                                     fit: BoxFit.cover,
                                   )
                                 : Center(
-                                    child: Text(
-                                      'Klik untuk memilih gambar',
-                                      style: TextStyle(
-                                        color: imageError
-                                            ? Colors.red
-                                            : Colors.black,
-                                      ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.photo, // Ikon gambar
+                                          size: 48.0, // Ukuran ikon
+                                          color: imageError
+                                              ? Colors.red
+                                              : Colors.black, // Warna ikon
+                                        ),
+                                        Text(
+                                          'Pilih Foto',
+                                          style: TextStyle(
+                                            color: imageError
+                                                ? Colors.red
+                                                : Colors.black,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                       ),
@@ -199,6 +205,7 @@ class _KategoriScreenState extends State<KategoriScreen> {
                                 content: Text('Kategori berhasil dibuat')),
                           );
                           Navigator.of(context).pop();
+                          await fetchKategoriData(); // Auto reload setelah tambah
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -230,54 +237,208 @@ class _KategoriScreenState extends State<KategoriScreen> {
     );
   }
 
+  void _showEditKategoriModal(
+      BuildContext context, Map<String, dynamic> kategori) {
+    final _formKey = GlobalKey<FormState>();
+    String kategoriNama = kategori['nama_kategori'];
+    File? selectedImage;
+    Uint8List? webImageBytes = kategori['webImageBytes'];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              title: const Text('Edit Kategori', textAlign: TextAlign.center),
+              content: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      initialValue: kategoriNama,
+                      decoration: const InputDecoration(
+                        labelText: 'Nama Kategori',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Nama kategori tidak boleh kosong';
+                        }
+                        return null;
+                      },
+                      onChanged: (value) {
+                        kategoriNama = value;
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: () async {
+                        final ImagePicker picker = ImagePicker();
+                        if (kIsWeb) {
+                          FilePickerResult? result =
+                              await FilePicker.platform.pickFiles(
+                            type: FileType.image,
+                            allowMultiple: false,
+                          );
+
+                          if (result != null &&
+                              result.files.single.bytes != null) {
+                            setModalState(() {
+                              webImageBytes = result.files.single.bytes;
+                              selectedImage = null;
+                            });
+                          }
+                        } else {
+                          final XFile? image = await picker.pickImage(
+                              source: ImageSource.gallery);
+
+                          if (image != null) {
+                            setModalState(() {
+                              selectedImage = File(image.path);
+                              webImageBytes = null;
+                            });
+                          }
+                        }
+                      },
+                      child: Container(
+                        height: 150,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: webImageBytes != null
+                            ? Image.memory(
+                                webImageBytes!,
+                                fit: BoxFit.cover,
+                              )
+                            : selectedImage != null
+                                ? Image.file(
+                                    selectedImage!,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.network(
+                                    kategori['foto'],
+                                    fit: BoxFit.cover,
+                                  ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      final updatedKategori = {
+                        'id': kategori['id'],
+                        'nama_kategori': kategoriNama,
+                        'foto': selectedImage,
+                        'webImageBytes': webImageBytes,
+                      };
+
+                      bool isSuccess =
+                          await ApiService.updateKategori(updatedKategori);
+
+                      if (isSuccess) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Kategori berhasil diperbarui')),
+                        );
+                        Navigator.of(context).pop();
+                        await fetchKategoriData(); // Reload data
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Gagal memperbarui kategori')),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('Simpan'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchKategoriData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'SEMUA KATEGORI SOAL',
-          style: TextStyle(
-            color: Color(0xFF4A44A5),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: const Text('SEMUA KATEGORI SOAL',
+            style: TextStyle(
+                color: Color(0xFF4A44A5), fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: ApiService().fetchKategori(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Tidak ada data kategori'));
-          }
-
-          final kategoriData = snapshot.data!;
-
-          return SingleChildScrollView(
-            child: PaginatedDataTable(
-              header: const Text(
-                'Tabel Kategori',
-                style: TextStyle(fontWeight: FontWeight.bold),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              decoration: const InputDecoration(
+                labelText: 'Cari kategori',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.search),
               ),
-              columns: const [
-                DataColumn(label: Text('No')),
-                DataColumn(label: Text('Gambar')),
-                DataColumn(label: Text('Kategori')),
-                DataColumn(label: Text('Aksi')),
-              ],
-              source: _KategoriDataSource(kategoriData, context),
-              rowsPerPage: 5,
-              availableRowsPerPage: const [5, 10, 15],
-              onRowsPerPageChanged: (value) {},
-              showCheckboxColumn: false,
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
+              },
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: PaginatedDataTable(
+                header: const Text('Tabel Kategori',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                columns: const [
+                  DataColumn(label: Text('No')),
+                  DataColumn(label: Text('Gambar')),
+                  DataColumn(label: Text('Kategori')),
+                  DataColumn(label: Text('Aksi')),
+                ],
+                source: _KategoriDataSource(
+                  kategoriData
+                      .where((item) => item['nama_kategori']
+                          .toString()
+                          .toLowerCase()
+                          .contains(searchQuery))
+                      .toList(),
+                  context,
+                  onEditKategori: _showEditKategoriModal,
+                ),
+                rowsPerPage: 5,
+                availableRowsPerPage: const [5, 10, 15],
+                onRowsPerPageChanged: (value) {},
+                showCheckboxColumn: false,
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -298,8 +459,9 @@ class _KategoriScreenState extends State<KategoriScreen> {
 class _KategoriDataSource extends DataTableSource {
   final List<Map<String, dynamic>> data;
   final BuildContext context;
+  final Function(BuildContext, Map<String, dynamic>) onEditKategori;
 
-  _KategoriDataSource(this.data, this.context);
+  _KategoriDataSource(this.data, this.context, {required this.onEditKategori});
 
   @override
   DataRow? getRow(int index) {
@@ -309,9 +471,13 @@ class _KategoriDataSource extends DataTableSource {
     return DataRow(
       cells: [
         DataCell(Text('${index + 1}')),
-        DataCell(CircleAvatar(
-          backgroundImage: AssetImage('assets/images/profile.png'),
-        )),
+        DataCell(
+          CircleAvatar(
+            backgroundImage: NetworkImage(
+              kategori['foto'],
+            ),
+          ),
+        ),
         DataCell(Text(kategori['nama_kategori'])),
         DataCell(
           Row(
@@ -319,7 +485,7 @@ class _KategoriDataSource extends DataTableSource {
               IconButton(
                 icon: const Icon(Icons.edit, color: Colors.yellow),
                 onPressed: () {
-                  // Logika edit kategori
+                  onEditKategori(context, kategori);
                 },
               ),
             ],

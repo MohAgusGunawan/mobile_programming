@@ -8,14 +8,18 @@ class ApiService {
   final String baseUrl;
 
   // Constructor untuk instans
-  ApiService({this.baseUrl = 'http://localhost:3000/api'});
+  ApiService({this.baseUrl = 'http://192.168.94.110:3000/api'});
 
   // Instans default untuk akses static
   static final ApiService _defaultInstance =
-      ApiService(baseUrl: 'http://localhost:3000/api');
+      ApiService(baseUrl: 'http://192.168.94.110:3000/api');
+  static final ApiService _default = ApiService(
+      baseUrl: 'http://192.168.94.110/mobile_programming/my_awesome_app');
 
   // Getter static untuk baseUrl
   static String get staticBaseUrl => _defaultInstance.baseUrl;
+  // Getter static untuk baseUrl
+  static String get localUrl => _default.baseUrl;
 
   Future<Map<String, dynamic>> login(String username, String password) async {
     final url = Uri.parse('$baseUrl/auth/login');
@@ -69,7 +73,7 @@ class ApiService {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://localhost:3000/api/kategori'),
+        Uri.parse('$staticBaseUrl/kategori'),
       );
 
       request.fields['nama_kategori'] = namaKategori;
@@ -109,7 +113,7 @@ class ApiService {
   }
 
   Future<List<Map<String, dynamic>>> fetchKategori() async {
-    final url = Uri.parse('http://localhost:3000/api/kategori');
+    final url = Uri.parse('$baseUrl/kategori');
     try {
       final response = await http.get(url);
 
@@ -122,7 +126,8 @@ class ApiService {
           return {
             'id': kategori['id'] as int, // pastikan id bertipe int
             'nama_kategori': kategori['nama_kategori'] as String,
-            'foto': kategori['foto'] as String,
+            'foto':
+                'http://192.168.94.110/mobile_programming/my_awesome_app/assets/images/kategori/${kategori['foto'] ?? 'default.png'}',
             'dibuat_oleh': kategori['dibuat_oleh']
                 as int, // pastikan dibuat_oleh bertipe int
           };
@@ -134,6 +139,97 @@ class ApiService {
     } catch (e) {
       print('Error fetching kategori: $e');
       return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchPengguna() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/users'));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success' && data['data'] != null) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        } else {
+          throw Exception('Data pengguna tidak ditemukan');
+        }
+      } else {
+        throw Exception(
+            'Gagal mengambil data pengguna. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Terjadi kesalahan saat mengambil data pengguna: $e');
+    }
+  }
+
+  Future<void> updatePengguna(Map<String, dynamic> updatedData) async {
+    try {
+      final uri = Uri.parse('$baseUrl/pengguna/${updatedData['id']}');
+      final request = http.MultipartRequest('PUT', uri);
+
+      // Tambahkan data username
+      request.fields['username'] = updatedData['username'];
+
+      // Tambahkan file foto jika ada
+      if (updatedData['photo'] != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'photo',
+          (updatedData['photo'] as File).path,
+        ));
+      }
+
+      // Kirim permintaan
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      // Cek status code
+      if (response.statusCode != 200) {
+        throw Exception('Gagal memperbarui pengguna: ${response.body}');
+      }
+    } catch (e) {
+      print('Error in updatePengguna: $e');
+      throw e;
+    }
+  }
+
+  static Future<bool> updateKategori(Map<String, dynamic> kategori) async {
+    try {
+      final uri = Uri.parse('$staticBaseUrl/kategori/${kategori['id']}');
+      final request = http.MultipartRequest('PUT', uri);
+
+      request.fields['nama_kategori'] = kategori['nama_kategori'];
+
+      if (kategori['foto'] != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'foto',
+          kategori['foto'].path,
+        ));
+      } else if (kategori['webImageBytes'] != null) {
+        request.files.add(http.MultipartFile.fromBytes(
+          'foto',
+          kategori['webImageBytes'],
+          filename: 'image.jpg',
+          contentType: MediaType('image', 'jpeg'),
+        ));
+      }
+
+      // Debug log
+      print('Fields: ${request.fields}');
+      print('Files: ${request.files}');
+
+      final response = await request.send();
+
+      // Debugging jika response gagal
+      if (response.statusCode != 200) {
+        final responseBody = await http.Response.fromStream(response);
+        print('Response status: ${response.statusCode}');
+        print('Response body: ${responseBody.body}');
+      }
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error updating kategori: $e');
+      return false;
     }
   }
 }

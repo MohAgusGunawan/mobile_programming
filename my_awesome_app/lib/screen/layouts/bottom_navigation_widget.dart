@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:my_awesome_app/screen/home_screen.dart';
+import 'package:my_awesome_app/screen/category_screen.dart';
 
 class BottomNavigationWidget extends StatelessWidget {
   final int currentIndex;
@@ -26,7 +28,26 @@ class BottomNavigationWidget extends StatelessWidget {
         _buildNavItem(Icons.show_chart, 'Statistics', currentIndex == 2),
         _buildNavItem(Icons.person, 'Profile', currentIndex == 3),
       ],
-      onTap: onTap,
+      onTap: (index) {
+        switch (index) {
+          case 0:
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => HomeScreen()));
+            break;
+          case 1:
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => CategoryScreen()));
+            break;
+          case 2:
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => HomeScreen()));
+            break;
+          case 3:
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => CategoryScreen()));
+            break;
+        }
+      },
       animationCurve: Curves.easeInOut,
       animationDuration: const Duration(milliseconds: 600),
     );

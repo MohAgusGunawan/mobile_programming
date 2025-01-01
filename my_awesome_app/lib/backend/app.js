@@ -7,13 +7,21 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const db = require('./db/connection');
 const bcrypt = require('bcrypt');
+const helmet = require('helmet');
 
 const app = express();
 const port = 3000;
 
+
 // Middleware
 app.use(bodyParser.json());
-app.use(cors());
+app.use(helmet());
+
+app.use(cors({
+    origin: "*",
+    credentials: true,
+}));
+
 
 // Endpoint untuk login
 app.post('/api/auth/login', (req, res) => {
@@ -174,6 +182,90 @@ app.get('/api/kategori', async (req, res) => {
             error: err.message
         });
     }
+});
+
+// Endpoint untuk mendapatkan data pengguna
+app.get('/api/users', (req, res) => {
+    const query = 'SELECT * FROM users'; // Ganti 'users' dengan nama tabel pengguna Anda
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error saat mengambil data pengguna:', err);
+            res.status(500).json({
+                status: 'error',
+                message: 'Gagal mengambil data pengguna',
+            });
+        } else {
+            res.status(200).json({
+                status: 'success',
+                data: results,
+            });
+        }
+    });
+});
+
+// Route: Edit kategori
+app.put('/api/kategori/:id', upload.single('foto'), (req, res) => {
+    const { id } = req.params;
+    const { nama_kategori } = req.body;
+    const fotoBaru = req.file ? req.file.filename : null;
+
+    // Ambil foto lama dari database
+    const getFotoQuery = 'SELECT foto FROM kategori WHERE id = ?';
+    db.query(getFotoQuery, [id], (err, results) => {
+        if (err) {
+            console.error('Error saat mengambil data kategori:', err);
+            return res.status(500).json({ message: 'Error saat mengambil data kategori' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Kategori tidak ditemukan' });
+        }
+
+        const fotoLama = results[0].foto;
+        const updateFields = [];
+        const values = [];
+
+        // Tambahkan field yang akan diperbarui
+        if (nama_kategori) {
+            updateFields.push('nama_kategori = ?');
+            values.push(nama_kategori);
+        }
+        if (fotoBaru) {
+            updateFields.push('foto = ?');
+            values.push(fotoBaru);
+        }
+
+        if (updateFields.length === 0) {
+            return res.status(400).json({ message: 'Tidak ada field untuk diperbarui' });
+        }
+
+        values.push(id);
+
+        const updateQuery = `UPDATE kategori SET ${updateFields.join(', ')} WHERE id = ?`;
+
+        // Hapus foto lama jika ada foto baru
+        db.query(updateQuery, values, (err) => {
+            if (err) {
+                console.error('Error saat memperbarui kategori:', err);
+                return res.status(500).json({ message: 'Error saat memperbarui kategori' });
+            }
+
+            if (fotoBaru && fotoLama) {
+                const fotoLamaPath = path.join(__dirname, '../../assets/images/kategori/', fotoLama);
+
+                // Hapus file foto lama
+                fs.unlink(fotoLamaPath, (err) => {
+                    if (err) {
+                        console.error('Error saat menghapus foto lama:', err);
+                        // Tidak perlu menghentikan proses jika gagal menghapus file
+                    }
+                });
+            }
+
+            res.json({ message: 'Kategori berhasil diperbarui' });
+        });
+    });
 });
 
 // Jalankan server
