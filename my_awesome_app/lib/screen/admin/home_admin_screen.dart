@@ -71,7 +71,7 @@ class HomeAdminScreen extends StatelessWidget {
                 // Tombol Get Started
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushReplacementNamed(context, '/dashboard');
+                    Navigator.pushReplacementNamed(context, '/bottom');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF007A), // Pink

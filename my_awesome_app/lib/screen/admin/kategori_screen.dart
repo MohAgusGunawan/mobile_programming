@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:my_awesome_app/screen/layouts/bottom_navigation_admin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_awesome_app/service/api_service.dart';
 
@@ -13,17 +12,10 @@ class KategoriScreen extends StatefulWidget {
 }
 
 class _KategoriScreenState extends State<KategoriScreen> {
-  int _currentIndex = 1;
   File? selectedImage;
   Uint8List? webImageBytes;
   String searchQuery = '';
   List<Map<String, dynamic>> kategoriData = [];
-
-  void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
 
   Future<void> fetchKategoriData() async {
     try {
@@ -448,10 +440,6 @@ class _KategoriScreenState extends State<KategoriScreen> {
         child: const Icon(Icons.add, color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: BottomNavigationAdmin(
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped,
-      ),
     );
   }
 }

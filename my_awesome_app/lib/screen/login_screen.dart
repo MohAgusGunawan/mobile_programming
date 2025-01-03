@@ -55,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await prefs.setInt('id', userId);
 
       if (role == 'user') {
-        Navigator.pushReplacementNamed(context, '/home');
+        Navigator.pushReplacementNamed(context, '/bottom_user');
       } else {
         Navigator.pushReplacementNamed(context, '/home_admin');
       }

@@ -268,6 +268,31 @@ app.put('/api/kategori/:id', upload.single('foto'), (req, res) => {
     });
 });
 
+// Endpoint untuk mendapatkan soal berdasarkan kategori
+app.get('/api/soal', (req, res) => {
+    const kategoriId = req.query.kategori_id;
+
+    if (!kategoriId) {
+        return res.status(400).json({ message: 'kategori_id diperlukan' });
+    }
+
+    const query = `
+      SELECT s.id, s.soal, s.id_kategori, k.nama_kategori 
+      FROM soal s
+      JOIN kategori k ON s.id_kategori = k.id
+      WHERE s.id_kategori = ?
+    `;
+
+    db.query(query, [kategoriId], (err, results) => {
+        if (err) {
+            console.error('Error fetching soal:', err);
+            return res.status(500).json({ message: 'Error fetching soal' });
+        }
+
+        res.json(results);
+    });
+});
+
 // Jalankan server
 app.listen(port, () => {
     console.log(`Server berjalan di http://localhost:${port}`);

@@ -232,4 +232,36 @@ class ApiService {
       return false;
     }
   }
+
+  // Ambil data soal
+  Future<List<Map<String, dynamic>>> fetchSoal(int kategoriId) async {
+    final url = Uri.parse('$baseUrl/soal?kategori_id=$kategoriId');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        // Parsing JSON dari body response
+        final List<dynamic> data = jsonDecode(response.body);
+
+        // Memastikan tipe data yang benar
+        return data.map((soal) {
+          return {
+            'id': soal['id'] as int, // pastikan id bertipe int
+            'soal': soal['soal'] as String, // pastikan soal bertipe String
+            'id_kategori':
+                soal['id_kategori'] as int, // pastikan kategori_id bertipe int
+            'nama_kategori': soal['nama_kategori']
+                as String, // pastikan nama_kategori bertipe String
+          };
+        }).toList();
+      } else {
+        throw Exception(
+            'Failed to load soal: ${response.statusCode} ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Error fetching soal: $e');
+      return [];
+    }
+  }
 }

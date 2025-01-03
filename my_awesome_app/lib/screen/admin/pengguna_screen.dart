@@ -3,7 +3,6 @@ import 'dart:io';
 // import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 // import 'package:flutter/foundation.dart';
-import 'package:my_awesome_app/screen/layouts/bottom_navigation_admin.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_awesome_app/service/api_service.dart';
 
@@ -13,16 +12,9 @@ class PenggunaScreen extends StatefulWidget {
 }
 
 class _PenggunaScreenState extends State<PenggunaScreen> {
-  int _currentIndex = 3;
   String searchQuery = '';
   List<Map<String, dynamic>> penggunaData = [];
   List<Map<String, dynamic>> filteredData = [];
-
-  void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
 
   Future<void> fetchPenggunaData() async {
     try {
@@ -225,10 +217,6 @@ class _PenggunaScreenState extends State<PenggunaScreen> {
                   ),
           ),
         ],
-      ),
-      bottomNavigationBar: BottomNavigationAdmin(
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped,
       ),
     );
   }

@@ -1,61 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:my_awesome_app/screen/home_screen.dart';
-import 'package:my_awesome_app/screen/category_screen.dart';
+import 'package:my_awesome_app/screen/ranking_screen.dart';
+import 'package:my_awesome_app/screen/statistic_screen.dart';
+import 'package:my_awesome_app/screen/profile_screen.dart';
 
-class BottomNavigationWidget extends StatelessWidget {
-  final int currentIndex;
-  final ValueChanged<int> onTap;
+class BottomNavigationWidget extends StatefulWidget {
+  @override
+  _BottomNavigationWidgetState createState() => _BottomNavigationWidgetState();
+}
 
-  const BottomNavigationWidget({
-    Key? key,
-    required this.currentIndex,
-    required this.onTap,
-  }) : super(key: key);
+class _BottomNavigationWidgetState extends State<BottomNavigationWidget> {
+  final PageController _pageController = PageController(initialPage: 0);
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = [
+    HomeScreen(),
+    RankingScreen(),
+    StatisticScreen(),
+    ProfileScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return CurvedNavigationBar(
-      index: currentIndex,
-      backgroundColor:
-          const Color(0xFF3498DB), // Transparansi untuk efek melengkung
-      color: Colors.white, // Warna bar navigasi
-      buttonBackgroundColor: Colors.white, // Warna tombol aktif
-      height: 50, // Tinggi untuk melengkung lebih jelas
-      items: [
-        _buildNavItem(Icons.home, 'Home', currentIndex == 0),
-        _buildNavItem(Icons.emoji_events, 'Ranking', currentIndex == 1),
-        _buildNavItem(Icons.show_chart, 'Statistics', currentIndex == 2),
-        _buildNavItem(Icons.person, 'Profile', currentIndex == 3),
-      ],
-      onTap: (index) {
-        switch (index) {
-          case 0:
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => HomeScreen()));
-            break;
-          case 1:
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => CategoryScreen()));
-            break;
-          case 2:
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => HomeScreen()));
-            break;
-          case 3:
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => CategoryScreen()));
-            break;
-        }
-      },
-      animationCurve: Curves.easeInOut,
-      animationDuration: const Duration(milliseconds: 600),
+    return Scaffold(
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        children: _pages,
+      ),
+      bottomNavigationBar: CurvedNavigationBar(
+        index: _currentIndex,
+        backgroundColor: const Color(0xFF3498DB),
+        color: Colors.white,
+        buttonBackgroundColor: Colors.white,
+        height: 50,
+        items: [
+          _buildNavItem(Icons.home, 'Home', _currentIndex == 0),
+          _buildNavItem(Icons.emoji_events, 'Ranking', _currentIndex == 1),
+          _buildNavItem(Icons.show_chart, 'Statistics', _currentIndex == 2),
+          _buildNavItem(Icons.person, 'Profile', _currentIndex == 3),
+        ],
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+          _pageController.animateToPage(
+            index,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        },
+        animationCurve: Curves.easeInOut,
+        animationDuration: const Duration(milliseconds: 600),
+      ),
     );
   }
 
   Widget _buildNavItem(IconData icon, String label, bool isSelected) {
     return Container(
-      width: 80,
+      width: 90,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -74,5 +82,11 @@ class BottomNavigationWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 }

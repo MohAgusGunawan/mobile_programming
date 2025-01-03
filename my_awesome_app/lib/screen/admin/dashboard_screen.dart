@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:my_awesome_app/screen/layouts/bottom_navigation_admin.dart';
 
 class DashboardScreen extends StatefulWidget {
   @override
@@ -7,14 +6,6 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _currentIndex = 2;
-
-  void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,6 +73,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // Tombol kategori soal
           Expanded(
             child: ListView(
+              controller: ScrollController(),
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               children: [
                 _buildDashboardCard(
@@ -89,7 +81,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   color: const Color(0xFFFF007A), // Pink
                   icon: Icons.folder,
                   onTap: () {
-                    Navigator.pushNamed(context, '/kategori');
+                    Navigator.pushNamed(
+                      context,
+                      '/bottom',
+                      arguments: 1,
+                    );
                   },
                 ),
                 const SizedBox(height: 16),
@@ -98,7 +94,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   color: const Color(0xFF00FF00), // Hijau
                   icon: Icons.help_outline,
                   onTap: () {
-                    // Aksi untuk soal
+                    Navigator.pushNamed(
+                      context,
+                      '/bottom',
+                      arguments: 0,
+                    );
                   },
                 ),
                 const SizedBox(height: 16),
@@ -107,18 +107,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   color: const Color(0xFF333333), // Hitam
                   icon: Icons.person,
                   onTap: () {
-                    // Aksi untuk pengguna
+                    Navigator.pushNamed(
+                      context,
+                      '/bottom',
+                      arguments: 3,
+                    );
                   },
                 ),
               ],
             ),
           ),
         ],
-      ),
-      // Navigasi bawah
-      bottomNavigationBar: BottomNavigationAdmin(
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped,
       ),
     );
   }
