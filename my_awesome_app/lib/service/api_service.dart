@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:http_parser/http_parser.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 
 class ApiService {
   final String baseUrl;
@@ -253,6 +254,14 @@ class ApiService {
                 soal['id_kategori'] as int, // pastikan kategori_id bertipe int
             'nama_kategori': soal['nama_kategori']
                 as String, // pastikan nama_kategori bertipe String
+            'gambar':
+                'http://192.168.94.110/mobile_programming/my_awesome_app/assets/images/soal/${soal['gambar'] ?? 'default.png'}',
+            'opsi_a': soal['opsi_a'],
+            'opsi_b': soal['opsi_b'],
+            'opsi_c': soal['opsi_c'],
+            'opsi_d': soal['opsi_d'],
+            'id_jawaban': soal['id_jawaban'],
+            'dibuat_oleh': soal['dibuat_oleh']
           };
         }).toList();
       } else {
@@ -262,6 +271,106 @@ class ApiService {
     } catch (e) {
       print('Error fetching soal: $e');
       return [];
+    }
+  }
+
+  // Fungsi untuk menambahkan soal dengan upload gambar
+  Future<bool> createSoal(Map<String, dynamic> newSoal, File? image,
+      String userId, Uint8List? webImageBytes) async {
+    try {
+      final uri = Uri.parse('$baseUrl/soal'); // Endpoint untuk menambahkan soal
+      var request = http.MultipartRequest('POST', uri);
+
+      // Menambahkan data form lainnya
+      request.fields['id_kategori'] = newSoal['id_kategori'].toString();
+      request.fields['soal'] = newSoal['soal'];
+      request.fields['opsi_a'] = newSoal['opsi_a'];
+      request.fields['opsi_b'] = newSoal['opsi_b'];
+      request.fields['opsi_c'] = newSoal['opsi_c'];
+      request.fields['opsi_d'] = newSoal['opsi_d'];
+      request.fields['id_jawaban'] = newSoal['id_jawaban'];
+      request.fields['id'] = userId;
+
+      if (image != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'gambar',
+          image.path,
+        ));
+      } else if (webImageBytes != null) {
+        request.files.add(http.MultipartFile.fromBytes(
+          'gambar',
+          webImageBytes,
+          filename: 'image.png',
+          contentType: MediaType('image', 'png'), // MIME type untuk gambar
+        ));
+      }
+
+      // Kirim request
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        print('Soal berhasil ditambahkan');
+        return true;
+      } else {
+        var responseBody = await http.Response.fromStream(response);
+        print('Error: ${responseBody.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Exception: $e');
+      return false;
+    }
+  }
+
+  Future<bool> editSoal(Map<String, dynamic> newSoal, File? image,
+      String userId, Uint8List? webImageBytes) async {
+    final uri = Uri.parse('$baseUrl/soal/${newSoal['id']}');
+
+    var request = http.MultipartRequest('PUT', uri);
+
+    // Menambahkan data form lainnya
+    request.fields['id_kategori'] = newSoal['id_kategori'].toString();
+    request.fields['soal'] = newSoal['soal'];
+    request.fields['opsi_a'] = newSoal['opsi_a'];
+    request.fields['opsi_b'] = newSoal['opsi_b'];
+    request.fields['opsi_c'] = newSoal['opsi_c'];
+    request.fields['opsi_d'] = newSoal['opsi_d'];
+    request.fields['id_jawaban'] = newSoal['id_jawaban'];
+    request.fields['id'] = userId;
+
+    if (image != null) {
+      request.files.add(await http.MultipartFile.fromPath(
+        'gambar',
+        image.path,
+      ));
+    } else if (webImageBytes != null) {
+      request.files.add(http.MultipartFile.fromBytes(
+        'gambar',
+        webImageBytes,
+        filename: 'image.png',
+        contentType: MediaType('image', 'png'), // MIME type untuk gambar
+      ));
+    }
+
+    // Kirim request dan cek respons
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // Hapus soal
+  Future<bool> deleteSoal(int id) async {
+    final url = Uri.parse('$baseUrl/soal/$id');
+    try {
+      final response = await http.delete(url);
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error deleting soal: $e');
+      return false;
     }
   }
 }

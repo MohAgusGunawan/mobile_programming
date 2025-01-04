@@ -102,6 +102,16 @@ const storage = multer.diskStorage({
         cb(null, uniqueName); // Simpan dengan nama unik
     },
 });
+const storage2 = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const folderPath = '../../assets/images/soal/';
+        cb(null, folderPath); // Direktori tujuan
+    },
+    filename: (req, file, cb) => {
+        const uniqueName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_'); // Nama file unik
+        cb(null, uniqueName); // Simpan dengan nama unik
+    },
+});
 
 // Filter file hanya untuk gambar
 const fileFilter = (req, file, cb) => {
@@ -115,6 +125,10 @@ const fileFilter = (req, file, cb) => {
 // Middleware untuk upload
 const upload = multer({
     storage: storage,
+    fileFilter: fileFilter,
+});
+const upload2 = multer({
+    storage: storage2,
     fileFilter: fileFilter,
 });
 
@@ -277,7 +291,7 @@ app.get('/api/soal', (req, res) => {
     }
 
     const query = `
-      SELECT s.id, s.soal, s.id_kategori, k.nama_kategori 
+      SELECT s.*, s.id_kategori, k.nama_kategori 
       FROM soal s
       JOIN kategori k ON s.id_kategori = k.id
       WHERE s.id_kategori = ?
@@ -290,6 +304,126 @@ app.get('/api/soal', (req, res) => {
         }
 
         res.json(results);
+    });
+});
+
+// Endpoint untuk menambahkan soal
+app.post('/api/soal', upload2.single('gambar'), async (req, res) => {
+    const { id_kategori, soal, opsi_a, opsi_b, opsi_c, opsi_d, id_jawaban, id } = req.body;
+    const gambar = req.file ? req.file.filename : null;
+    try {
+        const result = await db.query(
+            'INSERT INTO soal (id_kategori, soal, gambar, opsi_a, opsi_b, opsi_c, opsi_d, id_jawaban, dibuat_oleh) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [id_kategori, soal, gambar, opsi_a, opsi_b, opsi_c, opsi_d, id_jawaban, id]
+        );
+
+        res.status(200).json({ message: 'Soal berhasil ditambahkan' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Gagal menambahkan soal' });
+    }
+});
+
+// Route: Edit soal
+app.put('/api/soal/:id', upload2.single('gambar'), (req, res) => {
+    const { id } = req.params;
+    const { id_kategori, soal, opsi_a, opsi_b, opsi_c, opsi_d, id_jawaban } = req.body;
+    const gambarBaru = req.file ? req.file.filename : null;
+
+    // Ambil gambar lama dari database
+    const getGambarQuery = 'SELECT gambar FROM soal WHERE id = ?';
+    db.query(getGambarQuery, [id], (err, results) => {
+        if (err) {
+            console.error('Error saat mengambil data soal:', err);
+            return res.status(500).json({ message: 'Error saat mengambil data soal' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Soal tidak ditemukan' });
+        }
+
+        const gambarLama = results[0].gambar;
+        const updateFields = [];
+        const values = [];
+
+        // Tambahkan field yang akan diperbarui
+        if (id_kategori) {
+            updateFields.push('id_kategori = ?');
+            values.push(id_kategori);
+        }
+        if (soal) {
+            updateFields.push('soal = ?');
+            values.push(soal);
+        }
+        if (opsi_a) {
+            updateFields.push('opsi_a = ?');
+            values.push(opsi_a);
+        }
+        if (opsi_b) {
+            updateFields.push('opsi_b = ?');
+            values.push(opsi_b);
+        }
+        if (opsi_c) {
+            updateFields.push('opsi_c = ?');
+            values.push(opsi_c);
+        }
+        if (opsi_d) {
+            updateFields.push('opsi_d = ?');
+            values.push(opsi_d);
+        }
+        if (id_jawaban) {
+            updateFields.push('id_jawaban = ?');
+            values.push(id_jawaban);
+        }
+        if (gambarBaru) {
+            updateFields.push('gambar = ?');
+            values.push(gambarBaru);
+        }
+
+        if (updateFields.length === 0) {
+            return res.status(400).json({ message: 'Tidak ada field untuk diperbarui' });
+        }
+
+        values.push(id);
+
+        const updateQuery = `UPDATE soal SET ${updateFields.join(', ')} WHERE id = ?`;
+
+        // Jalankan query untuk memperbarui soal
+        db.query(updateQuery, values, (err) => {
+            if (err) {
+                console.error('Error saat memperbarui soal:', err);
+                return res.status(500).json({ message: 'Error saat memperbarui soal' });
+            }
+
+            // Hapus gambar lama jika ada gambar baru
+            if (gambarBaru && gambarLama) {
+                const gambarLamaPath = path.join(__dirname, '../../assets/images/soal/', gambarLama);
+
+                // Hapus file gambar lama
+                fs.unlink(gambarLamaPath, (err) => {
+                    if (err) {
+                        console.error('Error saat menghapus gambar lama:', err);
+                        // Tidak perlu menghentikan proses jika gagal menghapus file
+                    }
+                });
+            }
+
+            res.json({ message: 'Soal berhasil diperbarui' });
+        });
+    });
+});
+
+// Hapus soal
+app.delete('/api/soal/:id', (req, res) => {
+    const { id } = req.params;
+
+    const query = 'DELETE FROM soal WHERE id = ?';
+    db.query(query, [id], (err) => {
+        if (err) {
+            console.error('Error deleting soal:', err);
+            return res.status(500).json({ message: 'Error deleting soal' });
+        }
+        res.status(200).json({ message: 'Soal berhasil dihapus' });
     });
 });
 
