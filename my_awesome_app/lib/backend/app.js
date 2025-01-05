@@ -417,13 +417,41 @@ app.put('/api/soal/:id', upload2.single('gambar'), (req, res) => {
 app.delete('/api/soal/:id', (req, res) => {
     const { id } = req.params;
 
-    const query = 'DELETE FROM soal WHERE id = ?';
-    db.query(query, [id], (err) => {
+    // Ambil gambar dari database sebelum menghapus soal
+    const getGambarQuery = 'SELECT gambar FROM soal WHERE id = ?';
+    db.query(getGambarQuery, [id], (err, results) => {
         if (err) {
-            console.error('Error deleting soal:', err);
-            return res.status(500).json({ message: 'Error deleting soal' });
+            console.error('Error saat mengambil data soal:', err);
+            return res.status(500).json({ message: 'Error saat mengambil data soal' });
         }
-        res.status(200).json({ message: 'Soal berhasil dihapus' });
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Soal tidak ditemukan' });
+        }
+
+        const gambar = results[0].gambar;
+
+        // Hapus soal dari database
+        const deleteQuery = 'DELETE FROM soal WHERE id = ?';
+        db.query(deleteQuery, [id], (err) => {
+            if (err) {
+                console.error('Error saat menghapus soal:', err);
+                return res.status(500).json({ message: 'Error saat menghapus soal' });
+            }
+
+            // Hapus gambar jika ada
+            if (gambar) {
+                const gambarPath = path.join(__dirname, '../../assets/images/soal/', gambar);
+                fs.unlink(gambarPath, (err) => {
+                    if (err) {
+                        console.error('Error saat menghapus gambar:', err);
+                        // Tidak perlu menghentikan proses jika gagal menghapus file
+                    }
+                });
+            }
+
+            res.status(200).json({ message: 'Soal berhasil dihapus' });
+        });
     });
 });
 
