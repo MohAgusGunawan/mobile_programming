@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_awesome_app/service/api_service.dart';
-import 'package:http/http.dart' as http;
+// import 'package:http/http.dart' as http;
 
 class SoalScreen extends StatefulWidget {
   @override
@@ -91,14 +91,14 @@ class _SoalScreenState extends State<SoalScreen> {
     }
   }
 
-  Future<Uint8List> _fetchImageBytesFromUrl(String imageUrl) async {
-    final response = await http.get(Uri.parse(imageUrl));
-    if (response.statusCode == 200) {
-      return response.bodyBytes;
-    } else {
-      throw Exception('Gagal mengambil gambar dari URL');
-    }
-  }
+  // Future<Uint8List> _fetchImageBytesFromUrl(String imageUrl) async {
+  //   final response = await http.get(Uri.parse(imageUrl));
+  //   if (response.statusCode == 200) {
+  //     return response.bodyBytes;
+  //   } else {
+  //     throw Exception('Gagal mengambil gambar dari URL');
+  //   }
+  // }
 
   void _showSoalDialog([Map<String, dynamic>? soal]) {
     bool imageError = false;
@@ -308,27 +308,21 @@ class _SoalScreenState extends State<SoalScreen> {
                       }
 
                       if (result) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(soal == null
-                                  ? 'Soal berhasil ditambahkan!'
-                                  : 'Soal berhasil diperbarui!')),
-                        );
+                        _showSnackbar(
+                            soal == null
+                                ? 'Soal berhasil ditambahkan!'
+                                : 'Soal berhasil diperbarui!',
+                            Colors.green);
                         Navigator.pop(context);
                         _fetchSoal(selectedKategoriId!);
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(
-                                  'Gagal menambahkan atau memperbarui soal!')),
-                        );
+                        _showSnackbar(
+                            'Gagal menambahkan atau memperbarui soal!',
+                            Colors.red);
                       }
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content:
-                                Text('Terjadi kesalahan: ${e.toString()}')),
-                      );
+                      _showSnackbar(
+                          'Terjadi kesalahan: ${e.toString()}', Colors.red);
                     }
                   },
                   child: Text(soal == null ? 'Tambah' : 'Simpan'),
@@ -359,10 +353,30 @@ class _SoalScreenState extends State<SoalScreen> {
         ],
       ),
     );
+
     if (confirm == true) {
-      await apiService.deleteSoal(soalId);
-      _fetchSoal(selectedKategori!);
+      final isSuccess = await apiService.deleteSoal(soalId);
+      if (isSuccess) {
+        _showSnackbar('Soal berhasil dihapus', Colors.green);
+        _fetchSoal(selectedKategori!);
+      } else {
+        _showSnackbar('Gagal menghapus soal', Colors.red);
+      }
     }
+  }
+
+  void _showSnackbar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+        duration: Duration(seconds: 2),
+        behavior:
+            SnackBarBehavior.floating, // Membuat Snackbar tampil mengambang
+        margin: EdgeInsets.only(
+            bottom: 300.0, left: 16.0, right: 16.0), // Atur margin
+      ),
+    );
   }
 
   @override

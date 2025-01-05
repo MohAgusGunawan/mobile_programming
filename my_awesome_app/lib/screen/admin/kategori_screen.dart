@@ -192,24 +192,16 @@ class _KategoriScreenState extends State<KategoriScreen> {
                         );
 
                         if (isSuccess) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Kategori berhasil dibuat')),
-                          );
+                          _showSnackbar(
+                              'Kategori berhasil dibuat', Colors.green);
                           Navigator.of(context).pop();
                           await fetchKategoriData(); // Auto reload setelah tambah
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Gagal membuat kategori')),
-                          );
+                          _showSnackbar('Gagal membuat kategori', Colors.red);
                         }
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content:
-                                  Text('Tidak dapat mengambil ID pengguna')),
-                        );
+                        _showSnackbar(
+                            'Tidak dapat mengambil ID pengguna', Colors.red);
                       }
                     } else {
                       if (!isImageSelected) {
@@ -344,17 +336,12 @@ class _KategoriScreenState extends State<KategoriScreen> {
                           await ApiService.updateKategori(updatedKategori);
 
                       if (isSuccess) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Kategori berhasil diperbarui')),
-                        );
+                        _showSnackbar(
+                            'Kategori berhasil diperbarui', Colors.green);
                         Navigator.of(context).pop();
                         await fetchKategoriData(); // Reload data
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Gagal memperbarui kategori')),
-                        );
+                        _showSnackbar('Gagal memperbarui kategori', Colors.red);
                       }
                     }
                   },
@@ -365,6 +352,20 @@ class _KategoriScreenState extends State<KategoriScreen> {
           },
         );
       },
+    );
+  }
+
+  void _showSnackbar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+        duration: Duration(seconds: 2),
+        behavior:
+            SnackBarBehavior.floating, // Membuat Snackbar tampil mengambang
+        margin: EdgeInsets.only(
+            bottom: 300.0, left: 16.0, right: 16.0), // Atur margin
+      ),
     );
   }
 
