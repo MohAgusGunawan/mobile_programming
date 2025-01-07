@@ -97,12 +97,31 @@ class CategoryScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 20),
-                            Text(
-                              category['nama_kategori'],
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: hasSoal ? Colors.black : Colors.grey,
+                            Expanded(
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    category['nama_kategori'],
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          hasSoal ? Colors.black : Colors.grey,
+                                    ),
+                                  ),
+                                  if (!hasSoal)
+                                    const Text(
+                                      "Coming soon!    ",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color:
+                                            Color.fromARGB(255, 240, 116, 107),
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
                           ],

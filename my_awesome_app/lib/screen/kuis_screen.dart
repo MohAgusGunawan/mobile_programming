@@ -17,7 +17,6 @@ class _KuisScreenState extends State<KuisScreen> {
   late List<Map<String, dynamic>> soalList;
   int _currentIndex = 0;
   int _skor = 0;
-  // bool _isFinished = false;
   int _remainingTime = 30;
   Timer? _timer;
 
@@ -110,13 +109,6 @@ class _KuisScreenState extends State<KuisScreen> {
       ),
       body: Container(
         color: const Color(0xFF8E44AD),
-        // decoration: const BoxDecoration(
-        //   gradient: LinearGradient(
-        //     colors: [Colors.blueAccent, const Color(0xFF8E44AD)],
-        //     begin: Alignment.topCenter,
-        //     end: Alignment.bottomCenter,
-        //   ),
-        // ),
         child: FutureBuilder<List<Map<String, dynamic>>>(
           future: _soalFuture,
           builder: (context, snapshot) {
@@ -131,16 +123,6 @@ class _KuisScreenState extends State<KuisScreen> {
 
             soalList = snapshot.data!;
             final soal = soalList[_currentIndex];
-
-            // if (_isFinished) {
-            //   return Center(
-            //     child: Text(
-            //       'Kuis Selesai!',
-            //       style: const TextStyle(
-            //           fontSize: 24, fontWeight: FontWeight.bold),
-            //     ),
-            //   );
-            // }
 
             return Padding(
               padding: const EdgeInsets.all(16.0),
@@ -180,7 +162,8 @@ class _KuisScreenState extends State<KuisScreen> {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          if (soal['gambar'] != null)
+                          if (soal['gambar'] != null &&
+                              !soal['gambar'].contains('default.png'))
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.network(
