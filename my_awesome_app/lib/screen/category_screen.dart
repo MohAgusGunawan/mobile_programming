@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_awesome_app/service/api_service.dart';
+import 'kuis_screen.dart';
 
 class CategoryScreen extends StatelessWidget {
   @override
@@ -19,7 +20,7 @@ class CategoryScreen extends StatelessWidget {
       body: Container(
         color: const Color(0xFF8E44AD),
         child: FutureBuilder<List<Map<String, dynamic>>>(
-          future: ApiService().fetchKategori(), // Panggil fungsi fetchKategori
+          future: ApiService().fetchKategori(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -42,55 +43,73 @@ class CategoryScreen extends StatelessWidget {
               itemCount: categories.length,
               itemBuilder: (context, index) {
                 final category = categories[index];
-                return GestureDetector(
-                  onTap: () {
-                    // Aksi saat kategori dipilih
-                    print("Kategori: ${category['nama_kategori']}");
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            bottomLeft: Radius.circular(10),
-                          ),
-                          child: Image.network(
-                            category['foto'],
-                            height: 50,
-                            width: 80,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(
-                              Icons.broken_image,
-                              size: 50,
-                              color: Colors.grey,
+
+                return FutureBuilder<List<Map<String, dynamic>>>(
+                  future: ApiService().fetchSoal(category['id']),
+                  builder: (context, soalSnapshot) {
+                    bool hasSoal =
+                        soalSnapshot.hasData && soalSnapshot.data!.isNotEmpty;
+
+                    return GestureDetector(
+                      onTap: hasSoal
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => KuisScreen(
+                                    kategoriId: category['id'],
+                                  ),
+                                ),
+                              );
+                            }
+                          : null,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: hasSoal ? Colors.white : Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
                             ),
-                          ),
+                          ],
                         ),
-                        const SizedBox(width: 20),
-                        Text(
-                          category['nama_kategori'],
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                bottomLeft: Radius.circular(10),
+                              ),
+                              child: Image.network(
+                                category['foto'],
+                                height: 50,
+                                width: 80,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(
+                                  Icons.broken_image,
+                                  size: 50,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Text(
+                              category['nama_kategori'],
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: hasSoal ? Colors.black : Colors.grey,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 );
               },
             );
