@@ -383,7 +383,12 @@ class _SoalScreenState extends State<SoalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Daftar Soal'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text('DATA SOAL',
+            style: TextStyle(
+                color: Color(0xFF4A44A5), fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -420,7 +425,6 @@ class _SoalScreenState extends State<SoalScreen> {
                           ),
                         )
                       : PaginatedDataTable(
-                          header: Text('Tabel Soal'),
                           rowsPerPage: rowsPerPage,
                           availableRowsPerPage: [
                             5,

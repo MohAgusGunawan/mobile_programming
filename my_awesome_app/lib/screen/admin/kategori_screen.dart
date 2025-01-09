@@ -381,7 +381,7 @@ class _KategoriScreenState extends State<KategoriScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text('SEMUA KATEGORI SOAL',
+        title: const Text('DATA KATEGORI',
             style: TextStyle(
                 color: Color(0xFF4A44A5), fontWeight: FontWeight.bold)),
         centerTitle: true,
@@ -406,8 +406,6 @@ class _KategoriScreenState extends State<KategoriScreen> {
           Expanded(
             child: SingleChildScrollView(
               child: PaginatedDataTable(
-                header: const Text('Tabel Kategori',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
                 columns: const [
                   DataColumn(label: Text('No')),
                   DataColumn(label: Text('Gambar')),

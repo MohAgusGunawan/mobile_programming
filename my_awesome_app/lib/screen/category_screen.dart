@@ -47,19 +47,112 @@ class CategoryScreen extends StatelessWidget {
                 return FutureBuilder<List<Map<String, dynamic>>>(
                   future: ApiService().fetchSoal(category['id']),
                   builder: (context, soalSnapshot) {
+                    if (soalSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
                     bool hasSoal =
                         soalSnapshot.hasData && soalSnapshot.data!.isNotEmpty;
+                    int jumlahSoal = soalSnapshot.data?.length ?? 0;
 
                     return GestureDetector(
                       onTap: hasSoal
                           ? () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => KuisScreen(
-                                    kategoriId: category['id'],
-                                  ),
-                                ),
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return Dialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(20),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                category['nama_kategori'],
+                                                style: const TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 20),
+                                              Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.timer,
+                                                    size: 30,
+                                                    color: Colors.red,
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  const Text(
+                                                      "30 Detik per Soal"),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 10),
+                                              Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.question_answer,
+                                                    size: 30,
+                                                    color: Colors.blue,
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  Text("$jumlahSoal Soal"),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 20),
+                                              Center(
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(
+                                                        context); // Tutup modal
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            KuisScreen(
+                                                          kategoriId:
+                                                              category['id'],
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        const Color(0xFF8E44AD),
+                                                  ),
+                                                  child: const Text("Mulai",
+                                                      style: TextStyle(
+                                                          color: Colors.white)),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 10,
+                                          right: 10,
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Icon(
+                                              Icons.close,
+                                              size: 24,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
                               );
                             }
                           : null,

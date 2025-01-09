@@ -14,7 +14,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscureText = true;
   final ApiService _apiService = ApiService();
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscureText = !_obscureText;
+    });
+  }
 
   Future<void> _handleLogin() async {
     final username = _usernameController.text;
@@ -145,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 20),
                 TextFormField(
                   controller: _passwordController,
-                  obscureText: true,
+                  obscureText: _obscureText, // Gunakan _obscureText
                   decoration: InputDecoration(
                     labelText: "Password",
                     floatingLabelBehavior: FloatingLabelBehavior.auto,
@@ -154,6 +161,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureText ? Icons.visibility_off : Icons.visibility,
+                        // color: Colors.grey,
+                      ),
+                      onPressed:
+                          _togglePasswordVisibility, // Panggil fungsi toggle
                     ),
                   ),
                 ),
@@ -186,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Expanded(
                       child: Divider(
                         thickness: 1,
-                        color: Colors.white30,
+                        color: Colors.black26,
                         indent: 20,
                         endIndent: 10,
                       ),
@@ -198,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Expanded(
                       child: Divider(
                         thickness: 1,
-                        color: Colors.white30,
+                        color: Colors.black26,
                         indent: 10,
                         endIndent: 20,
                       ),

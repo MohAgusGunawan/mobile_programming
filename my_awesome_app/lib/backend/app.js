@@ -80,13 +80,26 @@ app.post('/api/auth/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const insertQuery = 'INSERT INTO users (email, username, password, role) VALUES (?, ?, ?, ?)';
-        db.query(insertQuery, [email, username, hashedPassword, role], (err, result) => {
+        const insertUserQuery = 'INSERT INTO users (email, username, password, role) VALUES (?, ?, ?, ?)';
+        db.query(insertUserQuery, [email, username, hashedPassword, role], (err, result) => {
             if (err) {
                 console.error('Error saat menyimpan data:', err);
                 return res.status(500).json({ message: 'Gagal menyimpan data' });
             }
-            res.status(201).json({ message: 'Registrasi berhasil' });
+
+            // Ambil ID user yang baru saja dibuat
+            const userId = result.insertId;
+
+            // Insert data ke tabel profile
+            const insertProfileQuery = 'INSERT INTO profile (id_user) VALUES (?)';
+            db.query(insertProfileQuery, [userId], (err) => {
+                if (err) {
+                    console.error('Error saat menyimpan data profile:', err);
+                    return res.status(500).json({ message: 'Gagal menyimpan data profile' });
+                }
+
+                res.status(201).json({ message: 'Registrasi berhasil' });
+            });
         });
     });
 });

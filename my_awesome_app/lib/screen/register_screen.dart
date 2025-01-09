@@ -2,14 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:my_awesome_app/service/api_service.dart';
 
-class RegisterScreen extends StatelessWidget {
-  RegisterScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
+  @override
+  _RegisterScreenState createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
   final ApiService apiService = ApiService();
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool _isPasswordVisible = false; // Properti untuk mengatur tampilan password
 
   void registerUser(BuildContext context) async {
     final email = emailController.text.trim();
@@ -47,7 +53,7 @@ class RegisterScreen extends StatelessWidget {
     final overlay = Overlay.of(context);
     final overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        top: 20, // Jarak dari atas layar
+        top: 20,
         left: 20,
         right: 20,
         child: Material(
@@ -81,8 +87,8 @@ class RegisterScreen extends StatelessWidget {
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFF00B4DB), // Biru cerah
-              Color(0xFF8E44AD), // Ungu pekat
+              Color(0xFF00B4DB),
+              Color(0xFF8E44AD),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -100,7 +106,7 @@ class RegisterScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white, // Warna font judul
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -109,7 +115,7 @@ class RegisterScreen extends StatelessWidget {
                   decoration: InputDecoration(
                     labelText: "Email",
                     labelStyle: const TextStyle(
-                      color: Colors.black, // Warna label
+                      color: Colors.black,
                     ),
                     floatingLabelBehavior: FloatingLabelBehavior.auto,
                     filled: true,
@@ -126,7 +132,7 @@ class RegisterScreen extends StatelessWidget {
                   decoration: InputDecoration(
                     labelText: "Username",
                     labelStyle: const TextStyle(
-                      color: Colors.black, // Warna label
+                      color: Colors.black,
                     ),
                     floatingLabelBehavior: FloatingLabelBehavior.auto,
                     filled: true,
@@ -140,11 +146,11 @@ class RegisterScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 TextFormField(
                   controller: passwordController,
-                  obscureText: true,
+                  obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
                     labelText: "Password",
                     labelStyle: const TextStyle(
-                      color: Colors.black, // Warna label
+                      color: Colors.black,
                     ),
                     floatingLabelBehavior: FloatingLabelBehavior.auto,
                     filled: true,
@@ -152,6 +158,18 @@ class RegisterScreen extends StatelessWidget {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        });
+                      },
                     ),
                   ),
                 ),
@@ -167,7 +185,7 @@ class RegisterScreen extends StatelessWidget {
                     "REGISTER",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.black, // Warna font tombol
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -186,7 +204,7 @@ class RegisterScreen extends StatelessWidget {
                       'Lanjut Dengan Akun',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white70, // Warna teks divider
+                        color: Colors.white70,
                       ),
                     ),
                     Expanded(
@@ -215,14 +233,14 @@ class RegisterScreen extends StatelessWidget {
                   text: TextSpan(
                     text: "Already Have Account? ",
                     style: const TextStyle(
-                      color: Colors.white70, // Warna teks utama
+                      color: Colors.white70,
                     ),
                     children: [
                       TextSpan(
                         text: "Login Now",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.white, // Warna teks tautan
+                          color: Colors.white,
                           decoration: TextDecoration.underline,
                         ),
                         recognizer: TapGestureRecognizer()

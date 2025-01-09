@@ -193,10 +193,6 @@ class _PenggunaScreenState extends State<PenggunaScreen> {
                 ? const Center(child: Text('Tidak ada data pengguna'))
                 : SingleChildScrollView(
                     child: PaginatedDataTable(
-                      header: const Text(
-                        'Tabel Pengguna',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
                       columns: const [
                         DataColumn(label: Text('No')),
                         DataColumn(label: Text('Nama Pengguna')),
