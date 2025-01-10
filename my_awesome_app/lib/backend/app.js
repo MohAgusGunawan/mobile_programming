@@ -579,6 +579,36 @@ app.put('/api/profile/:id', upload3.single('foto'), (req, res) => {
     });
 });
 
+app.get('/api/dashboard', (req, res) => {
+    const userId = req.query.user_id;
+
+    const query = `
+        SELECT 
+        profile.nama, 
+        profile.foto, 
+        users.email, 
+        users.username,
+        IFNULL((SELECT COUNT(*) FROM kategori), 0) AS jumlah_kategori,
+        IFNULL((SELECT COUNT(*) FROM users WHERE role = 'user'), 0) AS jumlah_pengguna
+    FROM profile
+    JOIN users ON profile.id_user = users.id
+    WHERE profile.id_user = ?
+    `;
+
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error saat mengambil data dashboard:', err);
+            return res.status(500).json({ message: 'Error saat mengambil data dashboard' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Data tidak ditemukan' });
+        }
+
+        res.json(results[0]);
+    });
+});
+
 // Jalankan server
 app.listen(port, () => {
     console.log(`Server berjalan di http://localhost:${port}`);

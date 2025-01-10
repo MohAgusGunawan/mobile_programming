@@ -476,11 +476,14 @@ class SoalDataSource extends DataTableSource {
         DataCell(Row(
           children: [
             IconButton(
-              icon: Icon(Icons.edit),
+              icon: const Icon(Icons.edit, color: Colors.yellow),
               onPressed: () => showSoalDialog(soal),
             ),
             IconButton(
-              icon: Icon(Icons.delete),
+              icon: Icon(
+                Icons.delete,
+                color: Colors.red,
+              ),
               onPressed: () => deleteSoal(soal['id']),
             ),
           ],

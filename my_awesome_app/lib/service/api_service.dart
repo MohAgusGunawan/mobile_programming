@@ -452,4 +452,15 @@ class ApiService {
       return false;
     }
   }
+
+  Future<Map<String, dynamic>> fetchDashboardData(int userId) async {
+    final uri = Uri.parse('$baseUrl/dashboard?user_id=$userId');
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Gagal mengambil data dashboard');
+    }
+  }
 }
