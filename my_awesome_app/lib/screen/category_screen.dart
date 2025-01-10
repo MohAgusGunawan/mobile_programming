@@ -90,7 +90,12 @@ class CategoryScreen extends StatelessWidget {
                                                   ),
                                                   const SizedBox(width: 10),
                                                   const Text(
-                                                      "30 Detik per Soal"),
+                                                    "30 Detik per Soal",
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                               const SizedBox(height: 10),
@@ -102,7 +107,13 @@ class CategoryScreen extends StatelessWidget {
                                                     color: Colors.blue,
                                                   ),
                                                   const SizedBox(width: 10),
-                                                  Text("$jumlahSoal Soal"),
+                                                  Text(
+                                                    "$jumlahSoal Soal",
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                               const SizedBox(height: 20),

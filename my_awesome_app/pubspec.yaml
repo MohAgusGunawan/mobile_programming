@@ -71,6 +71,7 @@ flutter:
     - assets/images/fb.jpg
     - assets/images/book.png
     - assets/images/profile.png
+    - assets/images/profile/person.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

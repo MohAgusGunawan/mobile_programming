@@ -379,11 +379,10 @@ class _KategoriScreenState extends State<KategoriScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 1, 17, 247),
         elevation: 0,
         title: const Text('DATA KATEGORI',
-            style: TextStyle(
-                color: Color(0xFF4A44A5), fontWeight: FontWeight.bold)),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: Column(

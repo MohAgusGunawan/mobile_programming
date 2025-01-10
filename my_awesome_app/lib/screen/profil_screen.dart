@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:my_awesome_app/service/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfilScreen extends StatefulWidget {
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+  _ProfilScreenState createState() => _ProfilScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfilScreenState extends State<ProfilScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   final ApiService apiService = ApiService();
@@ -135,7 +135,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         behavior:
             SnackBarBehavior.floating, // Membuat Snackbar tampil mengambang
         margin: EdgeInsets.only(
-            bottom: 300.0, left: 16.0, right: 16.0), // Atur margin
+            bottom: 230.0, left: 16.0, right: 16.0), // Atur margin
       ),
     );
   }

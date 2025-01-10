@@ -3,7 +3,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:my_awesome_app/screen/home_screen.dart';
 import 'package:my_awesome_app/screen/ranking_screen.dart';
 import 'package:my_awesome_app/screen/statistic_screen.dart';
-import 'package:my_awesome_app/screen/profile_screen.dart';
+import 'package:my_awesome_app/screen/profil_screen.dart';
 
 class BottomNavigationWidget extends StatefulWidget {
   @override
@@ -18,7 +18,7 @@ class _BottomNavigationWidgetState extends State<BottomNavigationWidget> {
     HomeScreen(),
     RankingScreen(),
     StatisticScreen(),
-    ProfileScreen(),
+    ProfilScreen(),
   ];
 
   @override

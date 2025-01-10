@@ -125,6 +125,16 @@ const storage2 = multer.diskStorage({
         cb(null, uniqueName); // Simpan dengan nama unik
     },
 });
+const storage3 = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const folderPath = '../../assets/images/profile/';
+        cb(null, folderPath); // Direktori tujuan
+    },
+    filename: (req, file, cb) => {
+        const uniqueName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_'); // Nama file unik
+        cb(null, uniqueName); // Simpan dengan nama unik
+    },
+});
 
 // Filter file hanya untuk gambar
 const fileFilter = (req, file, cb) => {
@@ -142,6 +152,10 @@ const upload = multer({
 });
 const upload2 = multer({
     storage: storage2,
+    fileFilter: fileFilter,
+});
+const upload3 = multer({
+    storage: storage3,
     fileFilter: fileFilter,
 });
 
@@ -464,6 +478,103 @@ app.delete('/api/soal/:id', (req, res) => {
             }
 
             res.status(200).json({ message: 'Soal berhasil dihapus' });
+        });
+    });
+});
+
+// Endpoint untuk mendapatkan Profile Pengguna
+app.get('/api/profile', (req, res) => {
+    const userId = req.query.user_id;
+
+    if (!userId) {
+        return res.status(400).json({ message: 'user_id diperlukan' });
+    }
+
+    const query = `
+      SELECT p.*, p.id_user, u.email, u.id, u.email, u.username
+      FROM profile p
+      JOIN users u ON p.id_user = u.id
+      WHERE p.id_user = ?
+    `;
+
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching soal:', err);
+            return res.status(500).json({ message: 'Error fetching soal' });
+        }
+
+        res.json(results);
+    });
+});
+
+app.put('/api/profile/:id', upload3.single('foto'), (req, res) => {
+    const { id } = req.params;
+    const { nama, tanggal_lahir, jenis_kelamin, bio } = req.body;
+    const fotoBaru = req.file ? req.file.filename : null;
+
+    // Ambil foto lama dari database
+    const getFotoQuery = 'SELECT foto FROM profile WHERE id_user = ?';
+    db.query(getFotoQuery, [id], (err, results) => {
+        if (err) {
+            console.error('Error saat mengambil data profile:', err);
+            return res.status(500).json({ message: 'Error saat mengambil data profile' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Profile tidak ditemukan' });
+        }
+
+        const fotoLama = results[0].foto;
+        const updateFields = [];
+        const values = [];
+
+        if (nama) {
+            updateFields.push('nama = ?');
+            values.push(nama);
+        }
+        if (tanggal_lahir) {
+            updateFields.push('tanggal_lahir = ?');
+            values.push(tanggal_lahir);
+        }
+        if (jenis_kelamin) {
+            updateFields.push('jenis_kelamin = ?');
+            values.push(jenis_kelamin);
+        }
+        if (bio) {
+            updateFields.push('bio = ?');
+            values.push(bio);
+        }
+        if (fotoBaru) {
+            updateFields.push('foto = ?');
+            values.push(fotoBaru);
+        }
+
+        if (updateFields.length === 0 && !fotoBaru) {
+            return res.status(400).json({ message: 'Tidak ada field untuk diperbarui' });
+        }
+
+        values.push(id);
+
+        const updateQuery = `UPDATE profile SET ${updateFields.join(', ')} WHERE id_user = ?`;
+
+        // Jalankan query untuk memperbarui profile
+        db.query(updateQuery, values, (err) => {
+            if (err) {
+                console.error('Error saat memperbarui profile:', err);
+                return res.status(500).json({ message: 'Error saat memperbarui profile' });
+            }
+
+            // Hapus gambar lama jika ada gambar baru
+            if (fotoBaru && fotoLama && fotoBaru !== fotoLama) {
+                const fotoLamaPath = path.join(__dirname, '../../assets/images/profile/', fotoLama);
+                fs.unlink(fotoLamaPath, (err) => {
+                    if (err) {
+                        console.error('Error saat menghapus foto lama:', err);
+                    }
+                });
+            }
+
+            res.json({ message: 'Foto berhasil diperbarui' });
         });
     });
 });

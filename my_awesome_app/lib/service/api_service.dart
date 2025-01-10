@@ -373,4 +373,83 @@ class ApiService {
       return false;
     }
   }
+
+  // Profile
+  Future<List<Map<String, dynamic>>> fetchProfile(int userId) async {
+    final url = Uri.parse('$baseUrl/profile?user_id=$userId');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        // Parsing JSON dari body response
+        final List<dynamic> data = jsonDecode(response.body);
+
+        // Memastikan tipe data yang benar
+        return data.map((profile) {
+          return {
+            'id': profile['id'] as int,
+            'id_user': profile['id_user'] as int,
+            'nama': profile['nama'],
+            'foto':
+                'http://192.168.94.110/mobile_programming/my_awesome_app/assets/images/profile/${profile['foto'] ?? 'person.jpg'}',
+            'tanggal_lahir': profile['tanggal_lahir'],
+            'jenis_kelamin': profile['jenis_kelamin'],
+            'bio': profile['bio'],
+          };
+        }).toList();
+      } else {
+        throw Exception(
+            'Failed to load Pengguna: ${response.statusCode} ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Error fetching Pengguna: $e');
+      return [];
+    }
+  }
+
+  Future<bool> editProfile(Map<String, dynamic> newProfile, File? image,
+      Uint8List? webImageBytes) async {
+    final uri = Uri.parse('$baseUrl/profile/${newProfile['id']}');
+
+    var request = http.MultipartRequest('PUT', uri);
+
+    // Menambahkan data form lainnya
+    request.fields['id_user'] = newProfile['id_user'].toString();
+    if (newProfile['nama'] != null) {
+      request.fields['nama'] = newProfile['nama'];
+    }
+    if (newProfile['tanggal_lahir'] != null) {
+      request.fields['tanggal_lahir'] = newProfile['tanggal_lahir'];
+    }
+    if (newProfile['jenis_kelamin'] != null) {
+      request.fields['jenis_kelamin'] = newProfile['jenis_kelamin'];
+    }
+    if (newProfile['bio'] != null) {
+      request.fields['bio'] = newProfile['bio'];
+    }
+
+    if (image != null) {
+      request.files.add(await http.MultipartFile.fromPath(
+        'foto',
+        image.path,
+      ));
+    } else if (webImageBytes != null) {
+      request.files.add(http.MultipartFile.fromBytes(
+        'foto',
+        webImageBytes,
+        filename: 'image.png',
+        contentType: MediaType('image', 'png'), // MIME type untuk foto
+      ));
+    }
+
+    // Kirim request dan cek respons
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      print('Error: ${response.statusCode} ${response.reasonPhrase}');
+      return false;
+    }
+  }
 }
