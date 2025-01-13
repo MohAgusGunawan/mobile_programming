@@ -163,33 +163,43 @@ class ApiService {
     }
   }
 
-  Future<void> updatePengguna(Map<String, dynamic> updatedData) async {
+  Future<void> updatePengguna(
+      Map<String, dynamic> data, File? image, Uint8List? webImageBytes) async {
     try {
-      final uri = Uri.parse('$baseUrl/pengguna/${updatedData['id']}');
-      final request = http.MultipartRequest('PUT', uri);
+      var uri = Uri.parse('$baseUrl/pengguna/${data['id']}');
+      var request = http.MultipartRequest('PUT', uri);
 
-      // Tambahkan data username
-      request.fields['username'] = updatedData['username'];
+      request.fields['username'] = data['username'];
+      request.fields['nama'] = data['nama'];
 
-      // Tambahkan file foto jika ada
-      if (updatedData['photo'] != null) {
+      if (image != null) {
         request.files.add(await http.MultipartFile.fromPath(
-          'photo',
-          (updatedData['photo'] as File).path,
+          'foto',
+          image.path,
+        ));
+      } else if (webImageBytes != null) {
+        request.files.add(http.MultipartFile.fromBytes(
+          'foto',
+          webImageBytes,
+          filename: 'image.png',
+          contentType: MediaType('image', 'png'),
         ));
       }
 
-      // Kirim permintaan
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
+      request.headers.addAll({
+        'Accept': 'application/json',
+        'Content-Type': 'multipart/form-data',
+      });
 
-      // Cek status code
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+
       if (response.statusCode != 200) {
-        throw Exception('Gagal memperbarui pengguna: ${response.body}');
+        print('Failed response: $responseBody');
+        throw Exception('Failed to update pengguna: $responseBody');
       }
     } catch (e) {
-      print('Error in updatePengguna: $e');
-      throw e;
+      throw Exception('Error updating pengguna: $e');
     }
   }
 

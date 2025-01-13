@@ -227,7 +227,11 @@ app.get('/api/kategori', async (req, res) => {
 
 // Endpoint untuk mendapatkan data pengguna
 app.get('/api/users', (req, res) => {
-    const query = 'SELECT * FROM users'; // Ganti 'users' dengan nama tabel pengguna Anda
+    const query = `
+      SELECT p.*, u.*
+      FROM profile p
+      JOIN users u ON p.id_user = u.id
+      WHERE u.role = 'user'`;
 
     db.query(query, (err, results) => {
         if (err) {
@@ -242,6 +246,77 @@ app.get('/api/users', (req, res) => {
                 data: results,
             });
         }
+    });
+});
+
+// updatePengguna di app.js
+app.put('/api/pengguna/:id', upload3.single('foto'), (req, res) => {
+    const { id } = req.params;
+    const { username, nama } = req.body;
+    const fotoBaru = req.file ? req.file.filename : null;
+    console.log('Request received:', req.body);
+    console.log('Files received:', req.file);
+
+    // Ambil foto lama dari database
+    const getFotoQuery = `SELECT foto FROM profile WHERE id_user = ?`;
+    db.query(getFotoQuery, [id], (err, results) => {
+        if (err) {
+            console.error('Error saat mengambil data pengguna:', err);
+            return res.status(500).json({ message: 'Error saat mengambil data pengguna' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Pengguna tidak ditemukan' });
+        }
+
+        const fotoLama = results[0].foto;
+        const updateFields = [];
+        const values = [];
+
+        if (username) {
+            updateFields.push('username = ?');
+            values.push(username);
+        }
+        if (nama) {
+            updateFields.push('nama = ?');
+            values.push(nama);
+        }
+        if (fotoBaru) {
+            updateFields.push('foto = ?');
+            values.push(fotoBaru);
+        }
+
+        if (updateFields.length === 0) {
+            return res.status(400).json({ message: 'Tidak ada field untuk diperbarui' });
+        }
+
+        values.push(id);
+
+        const updateQuery = `
+            UPDATE users u
+        JOIN profile p ON u.id = p.id_user
+        SET ${updateFields.join(', ')}
+        WHERE u.id = ?`;
+
+        // Jalankan query untuk memperbarui pengguna
+        db.query(updateQuery, values, (err) => {
+            if (err) {
+                console.error('Error saat memperbarui pengguna:', err);
+                return res.status(500).json({ message: 'Error saat memperbarui pengguna' });
+            }
+
+            // Hapus gambar lama jika ada gambar baru
+            if (fotoBaru && fotoLama && fotoBaru !== fotoLama) {
+                const fotoLamaPath = path.join(__dirname, '../../assets/images/profile/', fotoLama);
+                fs.unlink(fotoLamaPath, (err) => {
+                    if (err) {
+                        console.error('Error saat menghapus foto lama:', err);
+                    }
+                });
+            }
+
+            res.json({ message: 'Pengguna berhasil diperbarui' });
+        });
     });
 });
 
