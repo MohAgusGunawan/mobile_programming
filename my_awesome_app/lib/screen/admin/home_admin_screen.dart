@@ -85,7 +85,7 @@ class HomeAdminScreen extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    "Get Started",
+                    "Mulai Sekarang",
                     style: TextStyle(fontSize: 18),
                   ),
                 ),

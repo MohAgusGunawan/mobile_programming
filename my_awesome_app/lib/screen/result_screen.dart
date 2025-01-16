@@ -91,7 +91,7 @@ class ResultScreen extends StatelessWidget {
                       // Navigasi ke halaman peringkat
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: const Color.fromARGB(255, 13, 233, 21),
                       padding: const EdgeInsets.symmetric(
                           vertical: 12, horizontal: 24),
                       shape: RoundedRectangleBorder(

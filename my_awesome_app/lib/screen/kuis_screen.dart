@@ -67,17 +67,37 @@ class _KuisScreenState extends State<KuisScreen> {
   void _finishQuiz() {
     _timer?.cancel();
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ResultScreen(
-          skor: _skor,
-          kategori: 'Pengetahuan Umum',
-          peringkat: 4,
-          onRestart: _restartKuis,
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.green,
+        title: const Text(
+          'Game Over',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            // color: Colors.red,
+          ),
         ),
       ),
     );
+
+    Future.delayed(const Duration(seconds: 3), () {
+      Navigator.pop(context); // Tutup dialog
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ResultScreen(
+            skor: _skor,
+            kategori: 'Pengetahuan Umum',
+            peringkat: 4,
+            onRestart: _restartKuis,
+          ),
+        ),
+      );
+    });
   }
 
   void _restartKuis() {
