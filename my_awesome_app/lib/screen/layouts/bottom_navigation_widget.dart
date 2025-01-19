@@ -35,9 +35,9 @@ class _BottomNavigationWidgetState extends State<BottomNavigationWidget> {
       ),
       bottomNavigationBar: CurvedNavigationBar(
         index: _currentIndex,
-        backgroundColor: const Color(0xFF3498DB),
-        color: Colors.white,
-        buttonBackgroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        color: const Color.fromARGB(255, 0, 37, 245),
+        buttonBackgroundColor: const Color.fromARGB(255, 1, 17, 247),
         height: 50,
         items: [
           _buildNavItem(Icons.home, 'Home', _currentIndex == 0),
@@ -70,13 +70,13 @@ class _BottomNavigationWidgetState extends State<BottomNavigationWidget> {
           Icon(
             icon,
             size: 30,
-            color: isSelected ? const Color(0xFF8E44AD) : Colors.grey,
+            color: isSelected ? Colors.white : Colors.black,
           ),
           Text(
             label,
             style: TextStyle(
               fontSize: 9,
-              color: isSelected ? const Color(0xFF8E44AD) : Colors.grey,
+              color: isSelected ? Colors.white : Colors.black,
             ),
           ),
         ],

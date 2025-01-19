@@ -10,7 +10,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF8E44AD),
+        backgroundColor: const Color.fromARGB(255, 1, 17, 247),
         elevation: 0,
         actions: [
           IconButton(
@@ -68,16 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFF8E44AD), // Ungu
-              Color(0xFF3498DB), // Biru
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+        color: Colors.white,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -88,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  // color: Colors.white,
                 ),
               ),
               const Text(
@@ -97,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  // color: Colors.white,
                 ),
               ),
               const SizedBox(height: 20),
@@ -106,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.pushReplacementNamed(context, '/category');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: const Color.fromARGB(255, 1, 17, 247),
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 40,
@@ -119,6 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: const Text(
                   'Mulai Bermain',
                   style: TextStyle(
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

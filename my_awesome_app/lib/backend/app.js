@@ -684,6 +684,90 @@ app.get('/api/dashboard', (req, res) => {
     });
 });
 
+// Endpoint untuk menyimpan skor dan papan peringkat
+app.post('/api/submit-quiz', async (req, res) => {
+    const {
+        id_user,
+        id_kategori,
+        nilai_skor,
+        total_soal,
+        jawaban_benar,
+        waktu_pengerjaan,
+        selesai_pada,
+    } = req.body;
+
+    const tanggalMinggu = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+
+    try {
+        // Simpan ke tabel skor
+        await db.query(
+            `INSERT INTO skor (id_user, id_kategori, nilai_skor, total_soal, jawaban_benar, waktu_pengerjaan, selesai_pada)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+                id_user,
+                id_kategori,
+                nilai_skor,
+                total_soal,
+                jawaban_benar,
+                waktu_pengerjaan,
+                selesai_pada,
+            ]
+        );
+
+        // Simpan ke tabel papan_peringkat
+        await db.query(
+            `INSERT INTO papan_peringkat (id_user, id_kategori, nilai_skor, waktu_pengerjaan, tanggal_minggu)
+            VALUES (?, ?, ?, ?, ?)`,
+            [id_user, id_kategori, nilai_skor, waktu_pengerjaan, tanggalMinggu]
+        );
+
+        res.status(200).json({ message: 'Skor berhasil disimpan' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Gagal menyimpan skor' });
+    }
+});
+
+app.get('/api/leaderboard/:id_kategori', (req, res) => {
+    const id_kategori = req.params.id_kategori;
+
+    const sql = `
+      SELECT 
+          subquery.id_user AS user_id,
+          COALESCE(profile.nama, users.username) AS nama,
+          COALESCE(profile.foto, 'person.jpg') AS foto,  
+          subquery.nilai_skor,
+          subquery.waktu_pengerjaan,
+          RANK() OVER (ORDER BY subquery.nilai_skor DESC, subquery.waktu_pengerjaan ASC) AS ranking
+      FROM (
+          SELECT 
+              id_user,
+              MAX(nilai_skor) AS nilai_skor,
+              MIN(waktu_pengerjaan) AS waktu_pengerjaan
+          FROM papan_peringkat
+          WHERE id_kategori = ?
+          GROUP BY id_user
+      ) AS subquery
+      INNER JOIN profile ON profile.id_user = subquery.id_user
+      INNER JOIN users ON users.id = profile.id_user
+      ORDER BY subquery.nilai_skor DESC, subquery.waktu_pengerjaan ASC;
+    `;
+
+    db.query(sql, [id_kategori], (err, results) => {
+        if (err) {
+            console.error('Error saat menjalankan query:', err);
+            return res.status(500).json({ error: 'Kesalahan server' });
+        }
+
+        if (!results || results.length === 0) {
+            return res.status(404).json({ message: 'Data tidak ditemukan' });
+        }
+
+        // Jika tidak ada error, kirimkan hasil
+        return res.status(200).json({ data: results });
+    });
+});
+
 // Jalankan server
 app.listen(port, () => {
     console.log(`Server berjalan di http://localhost:${port}`);

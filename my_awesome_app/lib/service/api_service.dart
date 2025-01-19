@@ -473,4 +473,49 @@ class ApiService {
       throw Exception('Gagal mengambil data dashboard');
     }
   }
+
+  // Fungsi untuk menyimpan skor dan papan peringkat
+  Future<void> submitQuiz({
+    required int idUser,
+    required int idKategori,
+    required int nilaiSkor,
+    required int totalSoal,
+    required int jawabanBenar,
+    required int waktuPengerjaan,
+    required DateTime selesaiPada,
+  }) async {
+    final url = Uri.parse('$baseUrl/submit-quiz');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'id_user': idUser,
+        'id_kategori': idKategori,
+        'nilai_skor': nilaiSkor,
+        'total_soal': totalSoal,
+        'jawaban_benar': jawabanBenar,
+        'waktu_pengerjaan': waktuPengerjaan,
+        'selesai_pada': selesaiPada.toIso8601String(),
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Gagal menyimpan skor: ${response.body}');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchLeaderboard(int kategoriId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/leaderboard/$kategoriId'),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> decodedData = json.decode(response.body);
+
+      // Pastikan Anda mengakses properti `data`
+      return List<Map<String, dynamic>>.from(decodedData['data']);
+    } else {
+      throw Exception('Gagal memuat leaderboard');
+    }
+  }
 }

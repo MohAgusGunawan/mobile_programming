@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:my_awesome_app/service/api_service.dart';
 import 'result_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class KuisScreen extends StatefulWidget {
   final int kategoriId;
@@ -15,6 +16,8 @@ class KuisScreen extends StatefulWidget {
 class _KuisScreenState extends State<KuisScreen> {
   late Future<List<Map<String, dynamic>>> _soalFuture;
   late List<Map<String, dynamic>> soalList;
+  late DateTime _waktuMulai;
+  late int idUser;
   int _currentIndex = 0;
   int _skor = 0;
   int _remainingTime = 30;
@@ -23,11 +26,18 @@ class _KuisScreenState extends State<KuisScreen> {
   @override
   void initState() {
     super.initState();
+    _initializeUser();
+    _waktuMulai = DateTime.now(); // Catat waktu mulai
     _soalFuture = ApiService().fetchSoal(widget.kategoriId).then((soal) {
       soal.shuffle();
       return soal;
     });
     _startTimer();
+  }
+
+  Future<void> _initializeUser() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    idUser = prefs.getInt('idUser') ?? 0; // Default ke 0 jika tidak ada
   }
 
   void _startTimer() {
@@ -66,35 +76,48 @@ class _KuisScreenState extends State<KuisScreen> {
 
   void _finishQuiz() {
     _timer?.cancel();
+    final int totalSoal = soalList.length;
+    final int jawabanBenar = _skor;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.green,
-        title: const Text(
-          'Game Over',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            // color: Colors.red,
-          ),
-        ),
-      ),
-    );
+    // Hitung durasi pengerjaan
+    final DateTime waktuSelesai = DateTime.now();
+    final int waktuPengerjaan =
+        waktuSelesai.difference(_waktuMulai).inSeconds; // Selisih dalam detik
 
-    Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pop(context); // Tutup dialog
+    ApiService()
+        .submitQuiz(
+      idUser: idUser,
+      idKategori: widget.kategoriId,
+      nilaiSkor: (_skor * 100 / totalSoal).round(),
+      totalSoal: totalSoal,
+      jawabanBenar: jawabanBenar,
+      waktuPengerjaan: waktuPengerjaan, // Kirim durasi yang benar
+      selesaiPada: waktuSelesai,
+    )
+        .then((_) {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => ResultScreen(
             skor: _skor,
-            kategori: 'Pengetahuan Umum',
-            peringkat: 4,
+            kategori: 'Pengetahuan Umum', // Ganti dengan nama kategori
+            peringkat: 4, // Tambahkan logika untuk menentukan peringkat
             onRestart: _restartKuis,
           ),
+        ),
+      );
+    }).catchError((error) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Kesalahan'),
+          content: Text('Gagal menyimpan skor: $error'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
         ),
       );
     });
@@ -105,14 +128,15 @@ class _KuisScreenState extends State<KuisScreen> {
       _skor = 0; // Reset skor
       _currentIndex = 0; // Reset index ke soal pertama
       _remainingTime = 30; // Reset waktu
+      _waktuMulai = DateTime.now(); // Reset waktu mulai
       _soalFuture = ApiService().fetchSoal(widget.kategoriId).then((soal) {
         soal.shuffle();
         return soal;
       }); // Ambil soal baru
-      _startTimer();
+      _startTimer(); // Mulai timer
     });
 
-    Navigator.pop(context);
+    Navigator.pop(context); // Kembali ke layar kuis
   }
 
   @override
@@ -211,10 +235,10 @@ class _KuisScreenState extends State<KuisScreen> {
                     final opsi = entry.value;
                     final opsiEnum = ['a', 'b', 'c', 'd'][index];
                     final opsiColors = [
-                      Colors.blueAccent,
-                      Colors.green,
-                      Colors.orange,
-                      Colors.red
+                      Colors.white,
+                      Colors.white,
+                      Colors.white,
+                      Colors.white
                     ]; // Warna tombol berbeda
 
                     return Padding(
