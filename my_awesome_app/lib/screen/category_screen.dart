@@ -7,7 +7,7 @@ class CategoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF8E44AD),
+        backgroundColor: const Color.fromARGB(255, 1, 17, 247),
         title: const Text(
           "PILIH KATEGORI SOAL",
           style: TextStyle(
@@ -18,7 +18,7 @@ class CategoryScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Container(
-        color: const Color(0xFF8E44AD),
+        color: const Color.fromARGB(255, 1, 17, 247),
         child: FutureBuilder<List<Map<String, dynamic>>>(
           future: ApiService().fetchKategori(),
           builder: (context, snapshot) {
@@ -136,7 +136,8 @@ class CategoryScreen extends StatelessWidget {
                                                   style:
                                                       ElevatedButton.styleFrom(
                                                     backgroundColor:
-                                                        const Color(0xFF8E44AD),
+                                                        const Color.fromARGB(
+                                                            255, 1, 17, 247),
                                                   ),
                                                   child: const Text("Mulai",
                                                       style: TextStyle(

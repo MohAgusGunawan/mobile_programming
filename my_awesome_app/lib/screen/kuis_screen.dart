@@ -37,7 +37,7 @@ class _KuisScreenState extends State<KuisScreen> {
 
   Future<void> _initializeUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    idUser = prefs.getInt('idUser') ?? 0; // Default ke 0 jika tidak ada
+    idUser = prefs.getInt('id') ?? 0; // Default ke 0 jika tidak ada
   }
 
   void _startTimer() {
@@ -99,9 +99,9 @@ class _KuisScreenState extends State<KuisScreen> {
         context,
         MaterialPageRoute(
           builder: (context) => ResultScreen(
-            skor: _skor,
-            kategori: 'Pengetahuan Umum', // Ganti dengan nama kategori
-            peringkat: 4, // Tambahkan logika untuk menentukan peringkat
+            skor: (_skor * 100 / totalSoal).round(),
+            // kategori: 'Pengetahuan Umum',
+            // peringkat: 4,
             onRestart: _restartKuis,
           ),
         ),
@@ -149,10 +149,11 @@ class _KuisScreenState extends State<KuisScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 1, 17, 247),
         title: const Text('Kuis'),
       ),
       body: Container(
-        color: const Color(0xFF8E44AD),
+        color: const Color.fromARGB(255, 1, 17, 247),
         child: FutureBuilder<List<Map<String, dynamic>>>(
           future: _soalFuture,
           builder: (context, snapshot) {
@@ -246,7 +247,7 @@ class _KuisScreenState extends State<KuisScreen> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: opsiColors[index],
-                          foregroundColor: Colors.white,
+                          foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),

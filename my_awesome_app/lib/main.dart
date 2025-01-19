@@ -8,6 +8,7 @@ import 'package:my_awesome_app/screen/admin/soal_screen.dart';
 import 'package:my_awesome_app/screen/category_screen.dart';
 import 'package:my_awesome_app/screen/home_screen.dart';
 import 'package:my_awesome_app/screen/login_screen.dart';
+import 'package:my_awesome_app/screen/ranking_screen.dart';
 import 'package:my_awesome_app/screen/register_screen.dart';
 import 'package:my_awesome_app/screen/layouts/bottom_navigation_admin.dart';
 import 'package:my_awesome_app/screen/layouts/bottom_navigation_widget.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         // user
         '/home': (context) => HomeScreen(),
         '/category': (context) => CategoryScreen(),
+        '/ranking': (context) => RankingScreen(),
 
         // admin
         '/home_admin': (context) => HomeAdminScreen(),
